@@ -3,7 +3,7 @@ import requests
 from flask import Flask, request
 
 BOT_TOKEN = "8859582099:AAHBgl7hq8EaigxHJZzFrr4cS1AhFwJQPCc"
-GROQ_API_KEY = "ВАШ_GROQ_КЛЮЧ"
+GROQ_API_KEY = "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"
 
 TELEGRAM_API = f"https://api.telegram.org/bot{BOT_TOKEN}"
 GROQ_API = "https://api.groq.com/openai/v1/chat/completions"
