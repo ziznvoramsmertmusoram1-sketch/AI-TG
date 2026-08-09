@@ -3,29 +3,31 @@ import requests
 from flask import Flask, request
 
 BOT_TOKEN = "8859582099:AAHBgl7hq8EaigxHJZzFrr4cS1AhFwJQPCc"
-GEMINI_API_KEY = "AQ.Ab8RN6J7sQYsTfMJbyvhtNyK3G3joQgtoIrWTTIPjdcB8VV-mQ"
+GROQ_API_KEY = "ВАШ_GROQ_КЛЮЧ"
 
 TELEGRAM_API = f"https://api.telegram.org/bot{BOT_TOKEN}"
-GEMINI_API = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key={GEMINI_API_KEY}"
+GROQ_API = "https://api.groq.com/openai/v1/chat/completions"
 
 app = Flask(__name__)
 
 user_histories = {}
 
 
-def ask_gemini(user_id, text):
+def ask_ai(user_id, text):
     history = user_histories.setdefault(user_id, [])
-    history.append({"role": "user", "parts": [{"text": text}]})
+    history.append({"role": "user", "content": text})
     try:
-        response = requests.post(GEMINI_API, json={"contents": history}, timeout=30)
+        headers = {"Authorization": f"Bearer {GROQ_API_KEY}"}
+        payload = {"model": "llama-3.3-70b-versatile", "messages": history}
+        response = requests.post(GROQ_API, headers=headers, json=payload, timeout=30)
         data = response.json()
-        if "candidates" not in data:
-            return f"Ошибка от Gemini: {data}"
-        reply = data["candidates"][0]["content"]["parts"][0]["text"]
-        history.append({"role": "model", "parts": [{"text": reply}]})
+        if "choices" not in data:
+            return f"Ошибка от AI: {data}"
+        reply = data["choices"][0]["message"]["content"]
+        history.append({"role": "assistant", "content": reply})
         return reply
     except Exception as e:
-        return f"Ошибка при обращении к Gemini: {e}"
+        return f"Ошибка при обращении к AI: {e}"
 
 
 def send_message(chat_id, text):
@@ -42,9 +44,9 @@ def webhook():
         text = message["text"]
 
         if text == "/start":
-            send_message(chat_id, "Привет! Я AI-бот на базе Gemini. Работаю круглосуточно на сервере.")
+            send_message(chat_id, "Привет! Я AI-бот. Работаю круглосуточно на сервере.")
         else:
-            reply = ask_gemini(chat_id, text)
+            reply = ask_ai(chat_id, text)
             send_message(chat_id, reply)
 
     return "OK", 200
@@ -57,4 +59,4 @@ def index():
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
-    app.run(host="0.0.0.0", port=port)
+    app.run(host="0.0.0.0", port=port) 
