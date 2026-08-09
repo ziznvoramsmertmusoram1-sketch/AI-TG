@@ -1,6 +1,28 @@
 import os
 import requests
 from flask import Flask, request
+import urllib.parse
+from deep_translator import GoogleTranslator
+
+def get_pollinations_url(user_text):
+    # 1. Переводим текст юзера на английский
+    translated_text = GoogleTranslator(source='auto', target='en').translate(user_text)
+    
+    # 2. Кодируем текст для URL (чтобы пробелы и знаки не ломали ссылку)
+    encoded_prompt = urllib.parse.quote(translated_text)
+    
+    # 3. Формируем итоговую ссылку на картинку
+    image_url = f"https://image.pollinations.ai/prompt/{encoded_prompt}"
+    
+    return image_url
+
+# Пример использования:
+russian_prompt = "Крутой кот в солнцезащитных очках на скейте"
+final_url = get_pollinations_url(russian_prompt)
+
+print(final_url)
+# Выдаст рабочую ссылку, где текст уже на английском!
+# Эту ссылку ты просто отправляешь юзеру через send_photo
 
 BOT_TOKEN = "8859582099:AAHBgl7hq8EaigxHJZzFrr4cS1AhFwJQPCc"
 GROQ_API_KEY = "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"
